@@ -52,69 +52,60 @@ new Vue({
     },
     methods: {
         addProductToCart: function(product) {
-            var cartItem = this.getCartItem(product);
-        
-            if (cartItem != null) {
-                cartItem.quantity++;
-            } else {
+            let prodInCart = this.getCartItem(product);
+
+            if (!prodInCart) {
                 this.cart.items.push({
-                    product: product,
+                    product,
                     quantity: 1
                 });
             }
-        
-            product.inStock--;
+            else {
+                ++prodInCart.quantity;
+            }
+
+            --product.inStock
         },
-        getCartItem: function(product) {
-            for (var i = 0; i < this.cart.items.length; i++) {
+        getCartItem(product) {
+            for (let i = 0; i < this.cart.items.length; ++i) {
                 if (this.cart.items[i].product.id === product.id) {
                     return this.cart.items[i];
                 }
             }
-        
             return null;
         },
         increaseQuantity: function(cartItem) {
-            cartItem.product.inStock--;
-            cartItem.quantity++;
+            --cartItem.product.inStock;
+            ++cartItem.quantity;
         },
         decreaseQuantity: function(cartItem) {
-            cartItem.quantity--;
-            cartItem.product.inStock++;
-        
-            if (cartItem.quantity == 0) {
-                this.removeItemFromCart(cartItem);
-            }
+            --cartItem.quantity;
+            ++cartItem.product.inStock;
+
+            if (!cartItem.quantity) this.removeItemFromCart(cartItem);
         },
         removeItemFromCart: function(cartItem) {
-            var index = this.cart.items.indexOf(cartItem);
-        
-            if (index !== -1) {
-                this.cart.items.splice(index, 1);
+            const idx = this.cart.items.indexOf(cartItem);
+
+            if (idx > -1) {
+                this.cart.items.splice(idx, 1);
             }
         },
         checkout: function() {
-            if (confirm('Are you sure that you want to purchase these products?')) {
-                this.cart.items.forEach(function(item) {
-                    item.product.inStock += item.quantity;
-                });
-            
+            if (confirm('u sure brah')) {
+                this.cart.items.forEach(item => item.product.inStock += item.quantity);
                 this.cart.items = [];
             }
         }
     },
     computed: {
         cartTotal: function() {
-            var total = 0;
-        
-            this.cart.items.forEach(function(item) {
-                total += item.quantity * item.product.price;
-            });
-        
+            let total = 0;
+            this.cart.items.forEach(item => total += item.quantity * item.product.price);
             return total;
         },
         taxAmount: function() {
-            return ((this.cartTotal * 10) / 100);
+            return this.cartTotal * 0.1;
         }
     },
     filters: {
@@ -122,9 +113,9 @@ new Vue({
             var formatter = new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
-                minimumFractionDigits: 0
+                minimumFractionDigits: 2
             });
-            
+
             return formatter.format(value);
         }
     }
